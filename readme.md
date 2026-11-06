@@ -114,7 +114,7 @@ Then cross-compile for a 64-bit Windows target:
 
 ```bash
 # Standalone executable
-x86_64-w64-mingw32-gcc ipp.c -o ipp.exe
+x86_64-w64-mingw32-gcc ipp.c -o ipp.exe -lwinspool -lkernel32 -O2
 ```
 
 For a 32-bit target, swap in the `i686-w64-mingw32-gcc` compiler instead.

